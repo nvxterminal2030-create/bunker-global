@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="title" content="NVVEX STUDIOS | Global Radar Intelligence">
+    <meta name="description" content="Sistema de monitoreo urbano global. Propiedad exclusiva de NVVEX STUDIOS LLC.">
+    <meta name="keywords" content="NVVEX STUDIOS, Hip Hop, Trap España, Drill USA, Industria Musical, NVVEX, Cristian Genao Moran">
+    <meta name="author" content="NVVEX STUDIOS LLC">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nvvexstudios.com">
+    <meta property="og:title" content="NVVEX STUDIOS - División Global">
+    <meta property="og:description" content="Noticias internacionales y radar de tendencias. Inteligencia de NVVEX.">
+    <meta property="og:image" content="https://tu-imagen-de-logo.png">
+
+    <link rel="canonical" href="https://nvvexstudios.com" />
+
     <title>NVVEX STUDIOS | GLOBAL RADAR</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
@@ -47,7 +61,7 @@
     <script>
         async function load() {
             try {
-                // Aquí es donde BUSCA la data
+                // Aquí es donde BUSCA la data del radar internacional
                 const r = await fetch('archivo.txt');
                 const t = await r.text();
                 const out = document.getElementById('output');
