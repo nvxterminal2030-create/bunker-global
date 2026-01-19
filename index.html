@@ -49,24 +49,27 @@
 
     <script>
         async function load() {
-            try {
-                const r = await fetch('archivo.txt');
-                const t = await r.text();
-                const out = document.getElementById('output');
-                if(!t.trim()) { out.innerHTML = "RADAR ONLINE. BUSCANDO TENDENCIAS..."; return; }
-                out.innerHTML = '';
-                const lines = t.trim().split('\n').reverse();
-                lines.forEach(l => {
-                    const [id, tit, fec, res] = l.split('|').map(s => s.trim());
-                    if(id) out.innerHTML += `
-                        <div class="news-item">
-                            <div style="font-size:0.7rem;">[ ${fec} ] ID: ${id}</div>
-                            <div style="font-weight:bold; font-size:1.1rem; color:#fff;">${tit}</div>
-                            <div style="color:#aaa; font-size:0.9rem;">${res}</div>
-                        </div>`;
-                });
-            } catch(e) { console.log("Reintentando conexión..."); }
-        }
+        try {
+            const r = await fetch('archivo.txt');
+            const t = await r.text();
+            const out = document.getElementById('output');
+            if(!t.trim()) { out.innerHTML = "RADAR ONLINE. BUSCANDO TENDENCIAS..."; return; }
+            out.innerHTML = '';
+            const lines = t.trim().split('\n').reverse();
+            lines.forEach(l => {
+                const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
+                if(id) out.innerHTML += `
+                    <div class="news-item">
+                        <div style="font-size:0.7rem; color: var(--neon);">[ ${fec} ] ID: ${id}</div>
+                        <div style="font-weight:bold; font-size:1.1rem; color:#fff; margin-top:5px;">${tit}</div>
+                        <div style="color:#aaa; font-size:0.9rem; margin: 10px 0;">${res}</div>
+                        <a href="${link}" class="btn-news" style="display:inline-block; padding:8px 15px; border:1px solid var(--neon); color:var(--neon); text-decoration:none; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; transition: 0.3s;">
+                            VER NOTA COMPLETA
+                        </a>
+                    </div>`;
+            });
+        } catch(e) { console.log("Reintentando conexión..."); }
+    }
         load();
         setInterval(load, 30000);
     </script>
