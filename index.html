@@ -25,12 +25,10 @@
             min-height: 100vh;
         }
 
-        /* RADAR TÁCTICO */
         .radar { width: 120px; height: 120px; border: 2px solid var(--neon); border-radius: 50%; margin: 20px 0; position: relative; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
         .radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.6; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* NAVEGACIÓN TÁCTICA */
         .nav-bunker { display: flex; gap: 10px; width: 90%; max-width: 800px; margin-bottom: 20px; }
         .btn-nav { flex: 1; padding: 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; text-align: center; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; background: rgba(0,242,255,0.05); }
         .btn-nav:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
@@ -41,15 +39,10 @@
         .btn-studio { display: block; width: 100%; padding: 15px; border: 1px solid var(--neon); color: #000; background: var(--neon); text-decoration: none; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.3s; margin-bottom: 25px; box-shadow: 0 0 15px var(--neon); }
         .btn-studio:hover { background: transparent; color: var(--neon); }
 
-        /* CUADRO DE TENDENCIA (USA/GLOBAL) */
         .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; border-bottom: 2px dashed var(--neon); padding-bottom: 30px; }
-        .trend-card { background: rgba(0,242,255,0.1); border: 1px solid var(--neon); padding: 10px; font-size: 0.8rem; position: relative; overflow: hidden; }
-        .trend-card::before { content: "TENDENCIA USA"; position: absolute; top: 0; right: 0; background: var(--neon); color: #000; font-size: 0.5rem; padding: 2px 5px; }
+        .trend-card { background: rgba(0,242,255,0.1); border: 1px solid var(--neon); padding: 10px; font-size: 0.8rem; position: relative; }
 
-        /* HISTORIAL DE NOTICIAS */
         .news-item { border-left: 4px solid var(--neon); padding: 15px; margin-bottom: 20px; background: rgba(0,242,255,0.05); position: relative; }
-        .news-item::after { content: 'NOTICIA MANUAL'; position: absolute; top: 5px; right: 10px; font-size: 0.6rem; opacity: 0.5; }
-        
         .btn-news { display: inline-block; padding: 8px 15px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; margin-top: 10px; }
         .btn-news:hover { background: var(--neon); color: #000; }
     </style>
@@ -78,37 +71,44 @@
         let allLines = [];
         let visibleCount = 30;
 
-        async function load() {
+        async function loadGlobal() {
             try {
-                const r = await fetch('archivo.txt');
-                const t = await r.text();
-                if(!t.trim()) return;
+                // 1. CARGAR TENDENCIAS (4 CUADROS)
+                const rTrend = await fetch('tendencia.txt');
+                const tTrend = await rTrend.text();
+                const trendOut = document.getElementById('trend-output');
                 
-                allLines = t.trim().split('\n').reverse();
-                render();
-            } catch(e) { console.log("Reintentando conexión..."); }
+                if(tTrend.trim()) {
+                    trendOut.innerHTML = '';
+                    const tLines = tTrend.trim().split('\n');
+                    tLines.slice(0, 4).forEach(l => {
+                        const [pos, song, art, res, link] = l.split('|').map(s => s.trim());
+                        trendOut.innerHTML += `
+                            <div class="trend-card">
+                                <div style="font-size:0.6rem; color:var(--neon); border-bottom:1px solid var(--grid); margin-bottom:5px;">RANK: ${pos}</div>
+                                <div style="font-weight:bold; color:#fff; font-size:0.9rem;">${song}</div>
+                                <div style="color:var(--neon); font-size:0.7rem; opacity:0.8;">${art}</div>
+                                <a href="${link}" style="color:var(--neon); text-decoration:none; font-size:0.55rem; display:block; margin-top:5px;">[ VINCULAR ]</a>
+                            </div>`;
+                    });
+                }
+
+                // 2. CARGAR HISTORIAL (ARCHIVO MANUAL)
+                const rNews = await fetch('archivo.txt');
+                const tNews = await rNews.text();
+                if(!tNews.trim()) return;
+                
+                allLines = tNews.trim().split('\n').reverse();
+                renderNews();
+            } catch(e) { console.log("Error de conexión..."); }
         }
 
-        function render() {
-            const trendOut = document.getElementById('trend-output');
+        function renderNews() {
             const newsOut = document.getElementById('output');
-            
-            // 1. CARGAR RADAR DE TENDENCIA (Primeras 4 líneas)
-            trendOut.innerHTML = '';
-            allLines.slice(0, 4).forEach(l => {
-                const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
-                trendOut.innerHTML += `
-                    <div class="trend-card">
-                        <div style="font-weight:bold; color:#fff; margin-bottom:5px;">${tit}</div>
-                        <a href="${link}" style="color:var(--neon); text-decoration:none; font-size:0.6rem;">[ VINCULAR ]</a>
-                    </div>`;
-            });
-
-            // 2. CARGAR HISTORIAL (De la 5 en adelante)
             newsOut.innerHTML = '';
-            allLines.slice(4, visibleCount).forEach(l => {
+            allLines.slice(0, visibleCount).forEach(l => {
                 const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
-                newsOut.innerHTML += `
+                if(id) newsOut.innerHTML += `
                     <div class="news-item">
                         <div style="font-size:0.7rem; color: var(--neon);">[ ${fec} ] ID: ${id}</div>
                         <div style="font-weight:bold; font-size:1.1rem; color:#fff; margin-top:5px;">${tit}</div>
@@ -118,13 +118,10 @@
             });
         }
 
-        function verMas() {
-            visibleCount += 30;
-            render();
-        }
+        function verMas() { visibleCount += 30; renderNews(); }
 
-        load();
-        setInterval(load, 30000);
+        loadGlobal();
+        setInterval(loadGlobal, 30000);
     </script>
 </body>
 </html>
