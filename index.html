@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NVVEX | GLOBAL RADAR</title>
+    <title>NVVEX | GLOBAL RADAR V6</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --dark: #050505; --grid: rgba(0, 242, 255, 0.15); }
         
-        /* FONDO DE ESTRELLAS Y CUADRÍCULA AZUL */
         body { 
             background: var(--dark); 
             background-image: 
@@ -27,49 +26,103 @@
         }
 
         /* RADAR TÁCTICO */
-        .radar { width: 120px; height: 120px; border: 2px solid var(--neon); border-radius: 50%; margin: 30px 0; position: relative; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
+        .radar { width: 120px; height: 120px; border: 2px solid var(--neon); border-radius: 50%; margin: 20px 0; position: relative; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
         .radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.6; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        /* NAVEGACIÓN TÁCTICA */
+        .nav-bunker { display: flex; gap: 10px; width: 90%; max-width: 800px; margin-bottom: 20px; }
+        .btn-nav { flex: 1; padding: 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; text-align: center; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; background: rgba(0,242,255,0.05); }
+        .btn-nav:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
+        .active { background: rgba(0,242,255,0.2); border-width: 2px; }
+
         .monitor { width: 90%; max-width: 800px; padding: 25px; border: 1px solid var(--neon); background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); box-shadow: 0 0 40px rgba(0,242,255,0.1); border-radius: 10px; z-index: 10; margin-bottom: 50px; }
         
-        .btn-studio { display: block; width: 100%; padding: 15px; border: 1px solid var(--neon); color: #000; background: var(--neon); text-decoration: none; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.3s; margin-bottom: 20px; box-shadow: 0 0 15px var(--neon); }
+        .btn-studio { display: block; width: 100%; padding: 15px; border: 1px solid var(--neon); color: #000; background: var(--neon); text-decoration: none; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.3s; margin-bottom: 25px; box-shadow: 0 0 15px var(--neon); }
         .btn-studio:hover { background: transparent; color: var(--neon); }
 
-        .news-item { border-left: 4px solid var(--neon); padding: 15px; margin-bottom: 20px; background: rgba(0,242,255,0.05); }
+        /* CUADRO DE TENDENCIA (USA/GLOBAL) */
+        .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; border-bottom: 2px dashed var(--neon); padding-bottom: 30px; }
+        .trend-card { background: rgba(0,242,255,0.1); border: 1px solid var(--neon); padding: 10px; font-size: 0.8rem; position: relative; overflow: hidden; }
+        .trend-card::before { content: "TENDENCIA USA"; position: absolute; top: 0; right: 0; background: var(--neon); color: #000; font-size: 0.5rem; padding: 2px 5px; }
+
+        /* HISTORIAL DE NOTICIAS */
+        .news-item { border-left: 4px solid var(--neon); padding: 15px; margin-bottom: 20px; background: rgba(0,242,255,0.05); position: relative; }
+        .news-item::after { content: 'NOTICIA MANUAL'; position: absolute; top: 5px; right: 10px; font-size: 0.6rem; opacity: 0.5; }
+        
+        .btn-news { display: inline-block; padding: 8px 15px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; margin-top: 10px; }
+        .btn-news:hover { background: var(--neon); color: #000; }
     </style>
 </head>
 <body>
     <div class="radar"></div>
+
+    <div class="nav-bunker">
+        <a href="https://www.nvvexstudios.com" class="btn-nav">VER RADAR LATAM [F1]</a>
+        <a href="#" class="btn-nav active">GLOBAL RADAR [V6-USA]</a>
+    </div>
+
     <div class="monitor">
-        <h1 style="text-align:center; letter-spacing: 5px;">NVVEX GLOBAL</h1>
+        <h1 style="text-align:center; letter-spacing: 5px; margin-bottom: 20px;">NVVEX GLOBAL</h1>
         <a href="https://www.nvvexstudios.com" class="btn-studio">ENTRAR AL ESTUDIO CENTRAL</a>
+
+        <div class="trend-grid" id="trend-output">
+            </div>
+
         <div id="output">ESCANEANDO SATÉLITES INTERNACIONALES...</div>
+        
+        <button onclick="verMas()" id="load-more" style="width: 100%; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; cursor: pointer; text-transform: uppercase; font-family: inherit; letter-spacing: 2px; margin-top: 20px;">[ VER MÁS NOTICIAS ]</button>
     </div>
 
     <script>
+        let allLines = [];
+        let visibleCount = 30;
+
         async function load() {
-        try {
-            const r = await fetch('archivo.txt');
-            const t = await r.text();
-            const out = document.getElementById('output');
-            if(!t.trim()) { out.innerHTML = "RADAR ONLINE. BUSCANDO TENDENCIAS..."; return; }
-            out.innerHTML = '';
-            const lines = t.trim().split('\n').reverse();
-            lines.forEach(l => {
+            try {
+                const r = await fetch('archivo.txt');
+                const t = await r.text();
+                if(!t.trim()) return;
+                
+                allLines = t.trim().split('\n').reverse();
+                render();
+            } catch(e) { console.log("Reintentando conexión..."); }
+        }
+
+        function render() {
+            const trendOut = document.getElementById('trend-output');
+            const newsOut = document.getElementById('output');
+            
+            // 1. CARGAR RADAR DE TENDENCIA (Primeras 4 líneas)
+            trendOut.innerHTML = '';
+            allLines.slice(0, 4).forEach(l => {
                 const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
-                if(id) out.innerHTML += `
+                trendOut.innerHTML += `
+                    <div class="trend-card">
+                        <div style="font-weight:bold; color:#fff; margin-bottom:5px;">${tit}</div>
+                        <a href="${link}" style="color:var(--neon); text-decoration:none; font-size:0.6rem;">[ VINCULAR ]</a>
+                    </div>`;
+            });
+
+            // 2. CARGAR HISTORIAL (De la 5 en adelante)
+            newsOut.innerHTML = '';
+            allLines.slice(4, visibleCount).forEach(l => {
+                const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
+                newsOut.innerHTML += `
                     <div class="news-item">
                         <div style="font-size:0.7rem; color: var(--neon);">[ ${fec} ] ID: ${id}</div>
                         <div style="font-weight:bold; font-size:1.1rem; color:#fff; margin-top:5px;">${tit}</div>
                         <div style="color:#aaa; font-size:0.9rem; margin: 10px 0;">${res}</div>
-                        <a href="${link}" class="btn-news" style="display:inline-block; padding:8px 15px; border:1px solid var(--neon); color:var(--neon); text-decoration:none; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; transition: 0.3s;">
-                            VER NOTA COMPLETA
-                        </a>
+                        <a href="${link}" class="btn-news">VER NOTA COMPLETA</a>
                     </div>`;
             });
-        } catch(e) { console.log("Reintentando conexión..."); }
-    }
+        }
+
+        function verMas() {
+            visibleCount += 30;
+            render();
+        }
+
         load();
         setInterval(load, 30000);
     </script>
