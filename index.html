@@ -11,33 +11,37 @@
         body { 
             background: var(--dark); color: var(--neon); font-family: 'Share Tech Mono', monospace; 
             margin: 0; overflow-x: hidden; display: flex; flex-direction: column; align-items: center;
+            position: relative;
         }
 
-        /* FONDO DE ESTRELLAS Y CUADRÍCULA */
+        /* FONDO ESTELAR Y CUADRÍCULA */
         .stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; overflow: hidden; }
         .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: travel 15s linear infinite; }
         @keyframes travel { from { transform: translateY(100vh); opacity: 0; } 10% { opacity: 1; } to { transform: translateY(-10vh); opacity: 0; } }
-        
         .grid-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
 
-        /* RADAR PSICÓPATA CENTRAL */
-        .radar-main { width: 120px; height: 120px; border: 2px solid var(--neon); border-radius: 50%; margin: 30px 0; position: relative; box-shadow: 0 0 20px var(--neon); }
-        .radar-main::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.3; }
+        /* EL RADAR PSICÓPATA ORIGINAL */
+        .radar-container { margin: 40px 0 20px 0; position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; }
+        .radar-main { width: 100%; height: 100%; border: 2px solid var(--neon); border-radius: 50%; position: relative; box-shadow: 0 0 25px var(--neon), inset 0 0 15px var(--neon); }
+        .radar-main::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.4; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* MONITOR INTERFAZ */
-        .monitor { width: 95%; max-width: 850px; padding: 25px; border: 1px solid var(--neon); background: rgba(5,5,5,0.9); box-shadow: 0 0 40px rgba(0,242,255,0.1); z-index: 10; margin-bottom: 50px; }
-        
-        .trend-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; border-bottom: 1px double var(--neon); padding-bottom: 30px; }
-        .trend-card { border: 1px solid var(--neon); padding: 15px; background: rgba(0,242,255,0.03); position: relative; transition: 0.3s; }
-        .trend-card:hover { background: rgba(0,242,255,0.1); box-shadow: inset 0 0 15px var(--neon); }
+        /* BOTONES DE NAVEGACIÓN TÁCTICA */
+        .nav-bunker { display: flex; gap: 10px; width: 95%; max-width: 850px; margin-bottom: 25px; z-index: 100; }
+        .btn-nav { flex: 1; padding: 12px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; text-align: center; font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; background: rgba(0, 242, 255, 0.05); transition: 0.3s; }
+        .btn-nav:hover, .btn-nav.active { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
 
+        /* MONITOR DE DATOS */
+        .monitor { width: 95%; max-width: 850px; padding: 25px; border: 1px solid var(--neon); background: rgba(5,5,5,0.95); box-shadow: 0 0 40px rgba(0,242,255,0.1); z-index: 10; margin-bottom: 60px; }
+        .trend-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; border-bottom: 1px solid var(--neon); padding-bottom: 30px; }
+        .trend-card { border: 1px solid var(--neon); padding: 15px; background: rgba(0,242,255,0.03); position: relative; cursor: pointer; }
+        
         /* MODAL DE INTELIGENCIA */
         #modal-inteligencia { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 550px; background: #050505; border: 2px solid var(--neon); padding: 25px; z-index: 1000; box-shadow: 0 0 100px #000; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; backdrop-filter: blur(8px); }
-        
+
         .news-item { border-left: 3px solid var(--neon); padding: 15px; margin-bottom: 15px; background: rgba(0,242,255,0.03); cursor: pointer; }
-        .btn-news { display: inline-block; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 5px 10px; font-size: 0.65rem; text-decoration: none; margin-top: 10px; text-transform: uppercase; }
+        .btn-news { display: inline-block; border: 1px solid var(--neon); color: var(--neon); padding: 6px 12px; font-size: 0.65rem; text-decoration: none; margin-top: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -46,15 +50,21 @@
     <div class="modal-overlay" id="modal-overlay" onclick="cerrarReporte()"></div>
     <div id="modal-inteligencia"></div>
 
-    <div class="radar-main"></div>
+    <div class="radar-container">
+        <div class="radar-main"></div>
+    </div>
+
+    <div class="nav-bunker">
+        <a href="https://www.nvvexstudios.com" class="btn-nav">VER RADAR LATAM [F1]</a>
+        <a href="#" class="btn-nav active">GLOBAL RADAR [V6-USA]</a>
+    </div>
 
     <div class="monitor">
-        <h1 style="text-align:center; letter-spacing: 15px; margin-bottom: 30px;">GLOBAL RADAR V6</h1>
+        <h1 style="text-align:center; letter-spacing: 12px; font-size: 1.5rem; margin-bottom: 30px;">GLOBAL INTEL V6</h1>
         
-        <div class="trend-grid" id="trend-output">
-            </div>
+        <div class="trend-grid" id="trend-output"></div>
 
-        <div id="output" style="margin-top: 20px;">INICIANDO SECUENCIA DE RASTREO...</div>
+        <div id="output">SINCRONIZANDO NODOS...</div>
         
         <button onclick="verMas()" style="width:100%; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:15px; cursor:pointer; font-family:inherit; margin-top:30px; font-weight:bold; letter-spacing:3px;">
             [ CARGAR MÁS INTELIGENCIA ]
@@ -65,7 +75,7 @@
         let allLines = [];
         let visibleCount = 30;
 
-        // Estrellas
+        // Estrellas en movimiento
         const field = document.getElementById('starfield');
         for (let i = 0; i < 60; i++) {
             let star = document.createElement('div');
@@ -88,8 +98,8 @@
                         const [pos, song, art, node, link] = l.split('|').map(s => s.trim());
                         tOut.innerHTML += `
                         <div class="trend-card" onclick="window.location.href='${link}'">
-                            <div style="font-size:0.6rem; background:var(--neon); color:#000; display:inline-block; padding:2px 5px; font-weight:bold;">NODE: ${node}</div>
-                            <div style="color:var(--neon); font-size:0.7rem; margin-top:8px;">RANKING: ${pos}</div>
+                            <div style="font-size:0.6rem; background:var(--neon); color:#000; display:inline-block; padding:2px 6px; font-weight:bold; margin-bottom:10px;">NODE: ${node}</div>
+                            <div style="color:var(--neon); font-size:0.75rem;">RANK: ${pos}</div>
                             <div style="color:#fff; font-weight:bold; font-size:1rem; margin:5px 0;">${song}</div>
                             <div style="color:var(--neon); opacity:0.8; font-size:0.8rem;">${art}</div>
                         </div>`;
@@ -98,7 +108,7 @@
                 const rN = await fetch('archivo.txt'); const tN = await rN.text();
                 allLines = tN.trim().split('\n').reverse();
                 render();
-            } catch(e) { console.log("Señal perdida..."); }
+            } catch(e) { console.log("Señal interrumpida..."); }
         }
 
         function render() {
@@ -109,8 +119,8 @@
                 <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
                     <div style="font-size:0.6rem; opacity:0.5;">[${fec}] ID:${id}</div>
                     <div style="font-weight:bold; color:#fff; font-size:1.1rem; margin:5px 0;">${tit}</div>
-                    <div style="font-size:0.85rem; opacity:0.8; line-height:1.4;">${res.substring(0,100)}...</div>
-                    <a href="${link}" class="btn-news" onclick="event.stopPropagation()">Ver Reporte Completo</a>
+                    <div style="font-size:0.85rem; opacity:0.8;">${res.substring(0,90)}...</div>
+                    <a href="${link}" class="btn-news" onclick="event.stopPropagation()">VER REPORTE COMPLETO</a>
                 </div>`;
             });
         }
@@ -120,11 +130,11 @@
             const m = document.getElementById('modal-inteligencia');
             m.style.display = 'block';
             m.innerHTML = `
-                <div style="background:var(--neon); color:#000; padding:8px; text-align:center; font-weight:bold; font-size:0.9rem; letter-spacing:2px;">IDENTIFICADOR: ${id}</div>
-                <p style="font-size:0.7rem; opacity:0.5; margin-top:10px;">FECHA DE CAPTURA: ${fec}</p>
+                <div style="background:var(--neon); color:#000; padding:8px; text-align:center; font-weight:bold; font-size:0.9rem;">IDENTIFICADOR: ${id}</div>
+                <p style="font-size:0.7rem; opacity:0.5; margin-top:10px;">CAPTURA: ${fec}</p>
                 <h2 style="color:#fff; border-bottom:1px solid var(--neon); padding-bottom:10px;">${tit}</h2>
                 <p style="color:#aaa; font-size:0.95rem; line-height:1.6;">${res}</p>
-                <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:12px; cursor:pointer; font-weight:bold; margin-top:10px;">CERRAR ARCHIVO</button>`;
+                <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:12px; cursor:pointer; font-weight:bold; margin-top:15px;">CERRAR REPORTE</button>`;
         }
 
         function cerrarReporte() {
