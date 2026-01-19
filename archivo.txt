@@ -1,1 +1,1 @@
-{{1.id}} | {{1.title}} | {{formatDate(now; "DD-MM-YYYY")}} | {{1.summary}}
+001 | NVVEX GLOBAL RADAR: ONLINE | 19-01-2026 | Sistema de monitoreo activado. Escaneando tendencias en USA y España. Conexión establecida con el centro de mando en RD.
