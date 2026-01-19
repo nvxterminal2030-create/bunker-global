@@ -3,125 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NVVEX | GLOBAL RADAR V6</title>
+    <title>NVVEX | GLOBAL MONITOR</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --dark: #050505; --grid: rgba(0, 242, 255, 0.15); }
+        :root { --neon: #00f2ff; --dark: #050505; --grid: rgba(0, 242, 255, 0.1); }
         
         body { 
             background: var(--dark); 
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-                linear-gradient(var(--grid) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-            background-size: 550px 550px, 350px 350px, 40px 40px, 40px 40px;
-            color: var(--neon); 
-            font-family: 'Share Tech Mono', monospace; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh;
+            background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--neon); font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; flex-direction: column; align-items: center;
         }
 
-        .radar { width: 120px; height: 120px; border: 2px solid var(--neon); border-radius: 50%; margin: 20px 0; position: relative; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
-        .radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.6; }
+        /* RADAR CENTRAL */
+        .main-radar { width: 100px; height: 100px; border: 2px solid var(--neon); border-radius: 50%; margin: 20px 0; position: relative; box-shadow: 0 0 15px var(--neon); }
+        .main-radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.4; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .nav-bunker { display: flex; gap: 10px; width: 90%; max-width: 800px; margin-bottom: 20px; }
-        .btn-nav { flex: 1; padding: 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; text-align: center; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; background: rgba(0,242,255,0.05); }
-        .btn-nav:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
-        .active { background: rgba(0,242,255,0.2); border-width: 2px; }
+        .nav-bunker { display: flex; gap: 10px; width: 95%; max-width: 850px; margin-bottom: 15px; }
+        .btn-nav { flex: 1; padding: 8px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; text-align: center; font-size: 0.7rem; text-transform: uppercase; transition: 0.3s; background: rgba(0,242,255,0.05); }
+        .btn-nav:hover, .active { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); }
 
-        .monitor { width: 90%; max-width: 800px; padding: 25px; border: 1px solid var(--neon); background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); box-shadow: 0 0 40px rgba(0,242,255,0.1); border-radius: 10px; z-index: 10; margin-bottom: 50px; }
+        .monitor { width: 95%; max-width: 850px; padding: 20px; border: 1px solid var(--neon); background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(0,242,255,0.1); margin-bottom: 50px; }
+
+        /* CUADROS TENDENCIA "PSICÓPATA" */
+        .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--neon); padding-bottom: 25px; }
+        .trend-card { 
+            border: 1px solid var(--neon); padding: 12px; position: relative; background: rgba(0,242,255,0.02);
+            box-shadow: inset 0 0 10px rgba(0,242,255,0.1); overflow: hidden;
+        }
+        .trend-card::before { content: 'TRACKING SIGNAL...'; position: absolute; top: 2px; right: 5px; font-size: 0.5rem; opacity: 0.5; }
         
-        .btn-studio { display: block; width: 100%; padding: 15px; border: 1px solid var(--neon); color: #000; background: var(--neon); text-decoration: none; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.3s; margin-bottom: 25px; box-shadow: 0 0 15px var(--neon); }
-        .btn-studio:hover { background: transparent; color: var(--neon); }
+        /* MINI RADAR INTERNO */
+        .mini-radar { float: right; width: 30px; height: 30px; border: 1px solid var(--neon); border-radius: 50%; position: relative; opacity: 0.6; }
+        .mini-radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 80%, var(--neon)); border-radius: 50%; animation: scan 2s linear infinite; }
 
-        .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; border-bottom: 2px dashed var(--neon); padding-bottom: 30px; }
-        .trend-card { background: rgba(0,242,255,0.1); border: 1px solid var(--neon); padding: 10px; font-size: 0.8rem; position: relative; }
+        .node-tag { font-size: 0.6rem; background: var(--neon); color: #000; padding: 2px 5px; display: inline-block; margin-bottom: 8px; font-weight: bold; }
 
-        .news-item { border-left: 4px solid var(--neon); padding: 15px; margin-bottom: 20px; background: rgba(0,242,255,0.05); position: relative; }
-        .btn-news { display: inline-block; padding: 8px 15px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; margin-top: 10px; }
-        .btn-news:hover { background: var(--neon); color: #000; }
+        /* HISTORIAL ESTILO COMANDO */
+        .news-item { border-left: 3px solid var(--neon); padding: 10px 15px; margin-bottom: 15px; background: rgba(0,242,255,0.03); font-size: 0.8rem; }
+        .btn-news { display: inline-block; padding: 5px 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.6rem; margin-top: 8px; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <div class="radar"></div>
-
+    <div class="main-radar"></div>
     <div class="nav-bunker">
-        <a href="https://www.nvvexstudios.com" class="btn-nav">VER RADAR LATAM [F1]</a>
+        <a href="https://www.nvvexstudios.com" class="btn-nav">LATAM RADAR [F1]</a>
         <a href="#" class="btn-nav active">GLOBAL RADAR [V6-USA]</a>
     </div>
 
     <div class="monitor">
-        <h1 style="text-align:center; letter-spacing: 5px; margin-bottom: 20px;">NVVEX GLOBAL</h1>
-        <a href="https://www.nvvexstudios.com" class="btn-studio">ENTRAR AL ESTUDIO CENTRAL</a>
-
+        <a href="https://www.nvvexstudios.com" style="text-decoration:none; color:inherit;"><h2 style="text-align:center; letter-spacing: 8px; margin-top:0;">NVVEX GLOBAL</h2></a>
+        
         <div class="trend-grid" id="trend-output">
             </div>
 
-        <div id="output">ESCANEANDO SATÉLITES INTERNACIONALES...</div>
-        
-        <button onclick="verMas()" id="load-more" style="width: 100%; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; cursor: pointer; text-transform: uppercase; font-family: inherit; letter-spacing: 2px; margin-top: 20px;">[ VER MÁS NOTICIAS ]</button>
+        <div id="output">ESPERANDO RESPUESTA DE SATÉLITE...</div>
+        <button onclick="verMas()" style="width:100%; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:8px; cursor:pointer; margin-top:15px; font-family:inherit;">[ CARGAR MÁS DATOS ]</button>
     </div>
 
     <script>
-        let allLines = [];
-        let visibleCount = 30;
-
-        async function loadGlobal() {
+        let allLines = []; let visibleCount = 30;
+        async function load() {
             try {
-                // 1. CARGAR TENDENCIAS (4 CUADROS)
-                const rTrend = await fetch('tendencia.txt');
-                const tTrend = await rTrend.text();
+                const rT = await fetch('tendencia.txt'); const tT = await rT.text();
                 const trendOut = document.getElementById('trend-output');
-                
-                if(tTrend.trim()) {
+                if(tT.trim()) {
                     trendOut.innerHTML = '';
-                    const tLines = tTrend.trim().split('\n');
-                    tLines.slice(0, 4).forEach(l => {
-                        const [pos, song, art, res, link] = l.split('|').map(s => s.trim());
+                    tT.trim().split('\n').slice(0,4).forEach(l => {
+                        const [pos, song, art, node, link] = l.split('|').map(s => s.trim());
                         trendOut.innerHTML += `
                             <div class="trend-card">
-                                <div style="font-size:0.6rem; color:var(--neon); border-bottom:1px solid var(--grid); margin-bottom:5px;">RANK: ${pos}</div>
-                                <div style="font-weight:bold; color:#fff; font-size:0.9rem;">${song}</div>
-                                <div style="color:var(--neon); font-size:0.7rem; opacity:0.8;">${art}</div>
-                                <a href="${link}" style="color:var(--neon); text-decoration:none; font-size:0.55rem; display:block; margin-top:5px;">[ VINCULAR ]</a>
+                                <div class="mini-radar"></div>
+                                <div class="node-tag">NODE: ${node}</div>
+                                <div style="color:var(--neon); font-size:0.6rem;">RANK: ${pos}</div>
+                                <div style="font-weight:bold; color:#fff; font-size:0.9rem; margin:3px 0;">${song}</div>
+                                <div style="color:var(--neon); opacity:0.8; font-size:0.75rem;">${art}</div>
+                                <a href="${link}" style="color:var(--neon); text-decoration:none; font-size:0.5rem; display:block; margin-top:8px;">[ VINCULAR ANALISIS ]</a>
                             </div>`;
                     });
                 }
-
-                // 2. CARGAR HISTORIAL (ARCHIVO MANUAL)
-                const rNews = await fetch('archivo.txt');
-                const tNews = await rNews.text();
-                if(!tNews.trim()) return;
-                
-                allLines = tNews.trim().split('\n').reverse();
-                renderNews();
-            } catch(e) { console.log("Error de conexión..."); }
+                const rN = await fetch('archivo.txt'); const tN = await rN.text();
+                if(!tN.trim()) return;
+                allLines = tN.trim().split('\n').reverse(); render();
+            } catch(e) { console.log("Reintentando..."); }
         }
-
-        function renderNews() {
-            const newsOut = document.getElementById('output');
-            newsOut.innerHTML = '';
+        function render() {
+            const out = document.getElementById('output'); out.innerHTML = '';
             allLines.slice(0, visibleCount).forEach(l => {
                 const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
-                if(id) newsOut.innerHTML += `
-                    <div class="news-item">
-                        <div style="font-size:0.7rem; color: var(--neon);">[ ${fec} ] ID: ${id}</div>
-                        <div style="font-weight:bold; font-size:1.1rem; color:#fff; margin-top:5px;">${tit}</div>
-                        <div style="color:#aaa; font-size:0.9rem; margin: 10px 0;">${res}</div>
-                        <a href="${link}" class="btn-news">VER NOTA COMPLETA</a>
-                    </div>`;
+                out.innerHTML += `<div class="news-item">
+                    <div style="font-size:0.6rem; opacity:0.6;">[${fec}] ID:${id}</div>
+                    <div style="font-weight:bold; color:#fff; margin:4px 0;">${tit}</div>
+                    <div style="opacity:0.7; font-size:0.75rem;">${res}</div>
+                    <a href="${link}" class="btn-news">VER REPORTE COMPLETO</a>
+                </div>`;
             });
         }
-
-        function verMas() { visibleCount += 30; renderNews(); }
-
-        loadGlobal();
-        setInterval(loadGlobal, 30000);
+        function verMas() { visibleCount += 30; render(); }
+        load(); setInterval(load, 30000);
     </script>
 </body>
 </html>
