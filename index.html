@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --dark: #050505; --grid: rgba(0, 242, 255, 0.1); }
+        
         body { 
             background: var(--dark); 
             background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
@@ -14,18 +15,35 @@
             color: var(--neon); font-family: 'Share Tech Mono', monospace; margin: 0; display: flex; flex-direction: column; align-items: center;
             overflow-x: hidden;
         }
+
+        /* FONDO ESTELAR */
         .stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: travel 15s linear infinite; }
         @keyframes travel { from { transform: translateY(100vh); opacity: 0; } 10% { opacity: 1; } to { transform: translateY(-10vh); opacity: 0; } }
-        
+
+        /* RADAR CENTRAL */
         .main-radar { width: 100px; height: 100px; border: 2px solid var(--neon); border-radius: 50%; margin: 20px 0; position: relative; box-shadow: 0 0 15px var(--neon); }
         .main-radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.4; }
         @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        .nav-bunker { display: flex; gap: 10px; width: 95%; max-width: 850px; margin-bottom: 15px; }
+        .btn-nav { flex: 1; padding: 8px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; text-align: center; font-size: 0.7rem; text-transform: uppercase; background: rgba(0,242,255,0.05); }
+        .active { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); }
+
         .monitor { width: 95%; max-width: 850px; padding: 20px; border: 1px solid var(--neon); background: rgba(0,0,0,0.9); box-shadow: 0 0 30px rgba(0,242,255,0.1); margin-bottom: 50px; z-index: 10; }
-        .news-item { border-left: 3px solid var(--neon); padding: 15px; margin-bottom: 15px; background: rgba(0,242,255,0.03); cursor: pointer; transition: 0.3s; }
-        .news-item:hover { background: rgba(0,242,255,0.08); }
-        
+
+        /* TENDENCIAS */
+        .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--neon); padding-bottom: 25px; }
+        .trend-card { border: 1px solid var(--neon); padding: 12px; position: relative; background: rgba(0,242,255,0.02); }
+        .mini-radar { float: right; width: 30px; height: 30px; border: 1px solid var(--neon); border-radius: 50%; position: relative; opacity: 0.6; }
+        .mini-radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 80%, var(--neon)); border-radius: 50%; animation: scan 2s linear infinite; }
+        .node-tag { font-size: 0.6rem; background: var(--neon); color: #000; padding: 2px 5px; display: inline-block; margin-bottom: 8px; font-weight: bold; }
+
+        /* NOTICIAS */
+        .news-item { border-left: 3px solid var(--neon); padding: 10px 15px; margin-bottom: 15px; background: rgba(0,242,255,0.03); cursor: pointer; }
+        .btn-news { display: inline-block; padding: 5px 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.6rem; margin-top: 8px; }
+
+        /* MODAL FRONTAL (EL DESPLIEGUE) */
         #modal-inteligencia { 
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             width: 90%; max-width: 550px; background: #000; border: 2px solid var(--neon); 
@@ -43,14 +61,21 @@
     <div id="modal-inteligencia"></div>
 
     <div class="main-radar"></div>
-    
+    <div class="nav-bunker">
+        <a href="https://www.nvvexstudios.com" class="btn-nav">LATAM RADAR [F1]</a>
+        <a href="#" class="btn-nav active">GLOBAL RADAR [V6-USA]</a>
+    </div>
+
     <div class="monitor">
-        <h2 style="text-align:center; letter-spacing: 8px; margin-top:0;">NVVEX INTELLIGENCE</h2>
-        <div id="output">ESPERANDO TRANSMISIÓN...</div>
+        <h2 style="text-align:center; letter-spacing: 8px; margin-top:0;">NVVEX GLOBAL</h2>
+        <div class="trend-grid" id="trend-output"></div>
+        <div id="output">RASTREANDO SEÑAL...</div>
+        <button onclick="verMas()" style="width:100%; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:10px; cursor:pointer; font-family:inherit; margin-top:15px;">[ CARGAR MÁS DATOS ]</button>
     </div>
 
     <script>
-        let allLines = [];
+        let allLines = []; let visibleCount = 30;
+
         // MOTOR DE ESTRELLAS
         const field = document.getElementById('starfield');
         for (let i = 0; i < 50; i++) {
@@ -65,23 +90,37 @@
 
         async function load() {
             try {
-                const rN = await fetch('archivo.txt'); 
-                const tN = await rN.text();
-                allLines = tN.trim().split('\n').reverse(); 
-                render();
-            } catch(e) { console.log("Reconectando..."); }
+                const rT = await fetch('tendencia.txt'); const tT = await rT.text();
+                const trendOut = document.getElementById('trend-output');
+                if(tT.trim()) {
+                    trendOut.innerHTML = '';
+                    tT.trim().split('\n').slice(0,4).forEach(l => {
+                        const [pos, song, art, node, link] = l.split('|').map(s => s.trim());
+                        trendOut.innerHTML += `
+                            <div class="trend-card" onclick="window.location.href='${link}'">
+                                <div class="mini-radar"></div>
+                                <div class="node-tag">NODE: ${node}</div>
+                                <div style="color:var(--neon); font-size:0.6rem;">RANK: ${pos}</div>
+                                <div style="font-weight:bold; color:#fff; font-size:0.9rem; margin:3px 0;">${song}</div>
+                                <div style="color:var(--neon); opacity:0.8; font-size:0.75rem;">${art}</div>
+                            </div>`;
+                    });
+                }
+                const rN = await fetch('archivo.txt'); const tN = await rN.text();
+                allLines = tN.trim().split('\n').reverse(); render();
+            } catch(e) { console.log("Señal débil..."); }
         }
 
         function render() {
-            const out = document.getElementById('output'); 
-            out.innerHTML = '';
-            allLines.forEach(l => {
+            const out = document.getElementById('output'); out.innerHTML = '';
+            allLines.slice(0, visibleCount).forEach(l => {
                 const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
                 out.innerHTML += `
                 <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
-                    <div style="font-size:0.65rem; color:var(--neon); font-weight:bold;">ARCHIVO ID: ${id}</div>
-                    <div style="font-weight:bold; color:#fff; font-size:1.1rem; margin:5px 0;">${tit}</div>
-                    <div style="opacity:0.6; font-size:0.75rem;">CAPTURA DE DATOS: ${fec}</div>
+                    <div style="font-size:0.6rem; opacity:0.6;">[${fec}] ID:${id}</div>
+                    <div style="font-weight:bold; color:#fff; margin:4px 0;">${tit}</div>
+                    <div style="opacity:0.7; font-size:0.75rem;">${res.substring(0,90)}...</div>
+                    <a href="${link}" class="btn-news" onclick="event.stopPropagation()">VER REPORTE</a>
                 </div>`;
             });
         }
@@ -90,15 +129,11 @@
             document.getElementById('modal-overlay').style.display = 'block';
             const m = document.getElementById('modal-inteligencia');
             m.style.display = 'block';
-            m.innerHTML = `
-                <div style="background:var(--neon); color:#000; padding:8px; text-align:center; font-weight:bold; font-size:0.8rem;">SISTEMA DE INTELIGENCIA NVVEX - ID: ${id}</div>
-                <p style="font-size:0.7rem; opacity:0.5; margin-top:15px;">FECHA DE REGISTRO: ${fec}</p>
-                <h2 style="color:#fff; border-bottom:1px solid var(--neon); padding-bottom:10px; margin:10px 0;">${tit}</h2>
+            m.innerHTML = `<div style="background:var(--neon); color:#000; padding:5px; text-align:center; font-weight:bold; font-size:0.8rem;">IDENTIFICADOR: ${id}</div>
+                <p style="font-size:0.7rem; opacity:0.5; margin-top:15px;">CAPTURA: ${fec}</p>
+                <h2 style="color:#fff; border-bottom:1px solid var(--neon); padding-bottom:10px;">${tit}</h2>
                 <p style="color:#aaa; line-height:1.6; font-size:1rem;">${res}</p>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button onclick="cerrarReporte()" style="flex:1; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:12px; cursor:pointer; font-weight:bold;">[ CERRAR ]</button>
-                </div>
-            `;
+                <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:12px; cursor:pointer; font-weight:bold; margin-top:15px;">[ CERRAR ARCHIVO ]</button>`;
         }
 
         function cerrarReporte() {
@@ -106,6 +141,7 @@
             document.getElementById('modal-inteligencia').style.display = 'none';
         }
 
+        function verMas() { visibleCount += 30; render(); }
         load();
     </script>
 </body>
