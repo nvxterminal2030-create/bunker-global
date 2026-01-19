@@ -13,105 +13,127 @@
             margin: 0; overflow-x: hidden; display: flex; flex-direction: column; align-items: center;
         }
 
-        /* FONTO ESTELAR */
-        .stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #050505; overflow: hidden; }
+        /* FONDO DE ESTRELLAS Y CUADRÍCULA */
+        .stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; overflow: hidden; }
         .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: travel 15s linear infinite; }
-        @keyframes travel { from { transform: translateY(100vh) scale(0.5); opacity: 0; } to { transform: translateY(-10vh) scale(1.2); opacity: 0; } }
-
-        /* INTERFAZ */
-        .monitor { width: 95%; max-width: 850px; padding: 25px; border: 1px solid var(--neon); background: rgba(0,0,0,0.92); box-shadow: 0 0 30px rgba(0,242,255,0.1); margin-top: 20px; z-index: 10; }
-        .trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--neon); padding-bottom: 20px; }
-        .trend-card { border: 1px solid var(--neon); padding: 12px; background: rgba(0,242,255,0.02); position: relative; }
+        @keyframes travel { from { transform: translateY(100vh); opacity: 0; } 10% { opacity: 1; } to { transform: translateY(-10vh); opacity: 0; } }
         
+        .grid-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
+
+        /* RADAR PSICÓPATA CENTRAL */
+        .radar-main { width: 120px; height: 120px; border: 2px solid var(--neon); border-radius: 50%; margin: 30px 0; position: relative; box-shadow: 0 0 20px var(--neon); }
+        .radar-main::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 70%, var(--neon)); border-radius: 50%; animation: scan 3s linear infinite; opacity: 0.3; }
+        @keyframes scan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* MONITOR INTERFAZ */
+        .monitor { width: 95%; max-width: 850px; padding: 25px; border: 1px solid var(--neon); background: rgba(5,5,5,0.9); box-shadow: 0 0 40px rgba(0,242,255,0.1); z-index: 10; margin-bottom: 50px; }
+        
+        .trend-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; border-bottom: 1px double var(--neon); padding-bottom: 30px; }
+        .trend-card { border: 1px solid var(--neon); padding: 15px; background: rgba(0,242,255,0.03); position: relative; transition: 0.3s; }
+        .trend-card:hover { background: rgba(0,242,255,0.1); box-shadow: inset 0 0 15px var(--neon); }
+
         /* MODAL DE INTELIGENCIA */
         #modal-inteligencia { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 550px; background: #050505; border: 2px solid var(--neon); padding: 25px; z-index: 1000; box-shadow: 0 0 100px #000; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; backdrop-filter: blur(8px); }
         
         .news-item { border-left: 3px solid var(--neon); padding: 15px; margin-bottom: 15px; background: rgba(0,242,255,0.03); cursor: pointer; }
-        .btn-news { display: inline-block; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 5px 10px; font-size: 0.6rem; text-decoration: none; margin-top: 10px; }
+        .btn-news { display: inline-block; background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 5px 10px; font-size: 0.65rem; text-decoration: none; margin-top: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="stars-container" id="starfield"></div>
+    <div class="grid-overlay"></div>
     <div class="modal-overlay" id="modal-overlay" onclick="cerrarReporte()"></div>
     <div id="modal-inteligencia"></div>
 
+    <div class="radar-main"></div>
+
     <div class="monitor">
-        <h2 style="text-align:center; letter-spacing: 10px;">GLOBAL RADAR V6</h2>
-        <div class="trend-grid" id="trend-output"></div>
-        <div id="output">SINCRONIZANDO CON SATÉLITE...</div>
-        <button onclick="verMas()" style="width:100%; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:10px; cursor:pointer; font-family:inherit; margin-top:20px;">[ CARGAR MÁS INTELIGENCIA ]</button>
+        <h1 style="text-align:center; letter-spacing: 15px; margin-bottom: 30px;">GLOBAL RADAR V6</h1>
+        
+        <div class="trend-grid" id="trend-output">
+            </div>
+
+        <div id="output" style="margin-top: 20px;">INICIANDO SECUENCIA DE RASTREO...</div>
+        
+        <button onclick="verMas()" style="width:100%; background:transparent; border:1px solid var(--neon); color:var(--neon); padding:15px; cursor:pointer; font-family:inherit; margin-top:30px; font-weight:bold; letter-spacing:3px;">
+            [ CARGAR MÁS INTELIGENCIA ]
+        </button>
     </div>
+
     <script>
-    let allLines = [];
-    let visibleCount = 30;
+        let allLines = [];
+        let visibleCount = 30;
 
-    // Generar estrellas
-    const field = document.getElementById('starfield');
-    for (let i = 0; i < 50; i++) {
-        let star = document.createElement('div');
-        star.className = 'star';
-        let size = Math.random() * 3 + 'px';
-        star.style.width = size; star.style.height = size;
-        star.style.left = Math.random() * 100 + 'vw';
-        star.style.animationDuration = (Math.random() * 10 + 10) + 's';
-        star.style.animationDelay = Math.random() * 5 + 's';
-        field.appendChild(star);
-    }
+        // Estrellas
+        const field = document.getElementById('starfield');
+        for (let i = 0; i < 60; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            let size = Math.random() * 3 + 'px';
+            star.style.width = size; star.style.height = size;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            field.appendChild(star);
+        }
 
-    async function load() {
-        try {
-            const rT = await fetch('tendencia.txt'); const tT = await rT.text();
-            const tOut = document.getElementById('trend-output');
-            if(tT.trim()) {
-                tOut.innerHTML = '';
-                tT.trim().split('\n').slice(0,4).forEach(l => {
-                    const [pos, song, art, node, link] = l.split('|').map(s => s.trim());
-                    tOut.innerHTML += `<div class="trend-card">
-                        <div style="font-size:0.6rem; background:var(--neon); color:#000; display:inline-block; padding:2px 5px;">${node}</div>
-                        <div style="color:var(--neon); font-size:0.7rem; margin-top:5px;">${pos}</div>
-                        <div style="color:#fff; font-weight:bold; font-size:0.9rem;">${song}</div>
-                        <div style="color:var(--neon); opacity:0.7; font-size:0.7rem;">${art}</div>
-                    </div>`;
-                });
-            }
-            const rN = await fetch('archivo.txt'); const tN = await rN.text();
-            allLines = tN.trim().split('\n').reverse();
-            render();
-        } catch(e) { console.log("Error de enlace."); }
-    }
+        async function load() {
+            try {
+                const rT = await fetch('tendencia.txt'); const tT = await rT.text();
+                const tOut = document.getElementById('trend-output');
+                if(tT.trim()) {
+                    tOut.innerHTML = '';
+                    tT.trim().split('\n').slice(0,4).forEach(l => {
+                        const [pos, song, art, node, link] = l.split('|').map(s => s.trim());
+                        tOut.innerHTML += `
+                        <div class="trend-card" onclick="window.location.href='${link}'">
+                            <div style="font-size:0.6rem; background:var(--neon); color:#000; display:inline-block; padding:2px 5px; font-weight:bold;">NODE: ${node}</div>
+                            <div style="color:var(--neon); font-size:0.7rem; margin-top:8px;">RANKING: ${pos}</div>
+                            <div style="color:#fff; font-weight:bold; font-size:1rem; margin:5px 0;">${song}</div>
+                            <div style="color:var(--neon); opacity:0.8; font-size:0.8rem;">${art}</div>
+                        </div>`;
+                    });
+                }
+                const rN = await fetch('archivo.txt'); const tN = await rN.text();
+                allLines = tN.trim().split('\n').reverse();
+                render();
+            } catch(e) { console.log("Señal perdida..."); }
+        }
 
-    function render() {
-        const out = document.getElementById('output'); out.innerHTML = '';
-        allLines.slice(0, visibleCount).forEach(l => {
-            const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
-            out.innerHTML += `<div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
-                <div style="font-size:0.6rem; opacity:0.5;">[${fec}] ID:${id}</div>
-                <div style="font-weight:bold; color:#fff;">${tit}</div>
-                <div style="font-size:0.75rem; opacity:0.8;">${res.substring(0,80)}...</div>
-                <a href="${link}" class="btn-news" onclick="event.stopPropagation()">VER REPORTE COMPLETO</a>
-            </div>`;
-        });
-    }
+        function render() {
+            const out = document.getElementById('output'); out.innerHTML = '';
+            allLines.slice(0, visibleCount).forEach(l => {
+                const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
+                out.innerHTML += `
+                <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
+                    <div style="font-size:0.6rem; opacity:0.5;">[${fec}] ID:${id}</div>
+                    <div style="font-weight:bold; color:#fff; font-size:1.1rem; margin:5px 0;">${tit}</div>
+                    <div style="font-size:0.85rem; opacity:0.8; line-height:1.4;">${res.substring(0,100)}...</div>
+                    <a href="${link}" class="btn-news" onclick="event.stopPropagation()">Ver Reporte Completo</a>
+                </div>`;
+            });
+        }
 
-    function abrirReporte(id, tit, fec, res) {
-        document.getElementById('modal-overlay').style.display = 'block';
-        const m = document.getElementById('modal-inteligencia');
-        m.style.display = 'block';
-        m.innerHTML = `<div style="background:var(--neon); color:#000; padding:5px; text-align:center; font-weight:bold; font-size:0.8rem;">ID: ${id}</div>
-            <p style="font-size:0.7rem; opacity:0.5;">CAPTURADO: ${fec}</p>
-            <h2 style="color:#fff; border-bottom:1px solid var(--neon);">${tit}</h2>
-            <p style="color:#aaa; font-size:0.9rem; line-height:1.5;">${res}</p>
-            <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:10px; cursor:pointer; font-weight:bold;">VOLVER</button>`;
-    }
+        function abrirReporte(id, tit, fec, res) {
+            document.getElementById('modal-overlay').style.display = 'block';
+            const m = document.getElementById('modal-inteligencia');
+            m.style.display = 'block';
+            m.innerHTML = `
+                <div style="background:var(--neon); color:#000; padding:8px; text-align:center; font-weight:bold; font-size:0.9rem; letter-spacing:2px;">IDENTIFICADOR: ${id}</div>
+                <p style="font-size:0.7rem; opacity:0.5; margin-top:10px;">FECHA DE CAPTURA: ${fec}</p>
+                <h2 style="color:#fff; border-bottom:1px solid var(--neon); padding-bottom:10px;">${tit}</h2>
+                <p style="color:#aaa; font-size:0.95rem; line-height:1.6;">${res}</p>
+                <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:12px; cursor:pointer; font-weight:bold; margin-top:10px;">CERRAR ARCHIVO</button>`;
+        }
 
-    function cerrarReporte() {
-        document.getElementById('modal-overlay').style.display = 'none';
-        document.getElementById('modal-inteligencia').style.display = 'none';
-    }
+        function cerrarReporte() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('modal-inteligencia').style.display = 'none';
+        }
 
-    function verMas() { visibleCount += 30; render(); }
-    load();
-</script>
+        function verMas() { visibleCount += 30; render(); }
+        load();
+    </script>
 </body>
 </html>
