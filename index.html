@@ -143,6 +143,32 @@
 
         function verMas() { visibleCount += 30; render(); }
         load();
+        // --- NVVEX SECURITY & BYPASS PROTOCOL ---
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.onkeydown = e => { 
+    if(e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || (e.shiftKey && e.keyCode == 73)))) return false; 
+};
+
+function nvxBypass(url) {
+    if (!url) return '';
+    return url.replace('http://', 'https://').trim();
+}
+// ----------------------------------------
     </script>
 </body>
 </html>
+<script>
+    // Bloqueo de Inspección y Clic Derecho
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = e => { 
+        if(e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || (e.shiftKey && e.keyCode == 73)))) return false; 
+    };
+
+    // Auto-limpieza de rastro en Consola
+    setInterval(() => { console.clear(); }, 1000);
+
+    // Protección de contenido (Anti-arrastre)
+    document.addEventListener('dragstart', e => e.preventDefault());
+
+    console.log("NVVEX SHIELD: FULLY OPERATIONAL");
+</script>
