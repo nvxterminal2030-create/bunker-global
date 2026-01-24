@@ -41,14 +41,15 @@
 
         /* TENDENCIAS */
         .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--neon); padding-bottom: 25px; }
-        .trend-card { border: 1px solid var(--neon); padding: 12px; position: relative; background: rgba(0,242,255,0.02); }
+        .trend-card { border: 1px solid var(--neon); padding: 12px; position: relative; background: rgba(0,242,255,0.02); cursor: pointer; }
         .mini-radar { float: right; width: 30px; height: 30px; border: 1px solid var(--neon); border-radius: 50%; position: relative; opacity: 0.6; }
         .mini-radar::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, transparent 80%, var(--neon)); border-radius: 50%; animation: scan 2s linear infinite; }
         .node-tag { font-size: 0.6rem; background: var(--neon); color: #000; padding: 2px 5px; display: inline-block; margin-bottom: 8px; font-weight: bold; }
 
         /* NOTICIAS */
         .news-item { border-left: 3px solid var(--neon); padding: 10px 15px; margin-bottom: 15px; background: rgba(0,242,255,0.03); cursor: pointer; }
-        .btn-news { display: inline-block; padding: 5px 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.6rem; margin-top: 8px; }
+        .btn-news { display: inline-block; padding: 5px 10px; border: 1px solid var(--neon); color: var(--neon); text-decoration: none; font-size: 0.6rem; margin-top: 8px; transition: 0.3s; }
+        .btn-news:hover { background: var(--neon); color: #000; }
 
         /* MODAL FRONTAL (EL DESPLIEGUE) */
         #modal-inteligencia { 
@@ -97,38 +98,59 @@
 
         async function load() {
             try {
+                // CARGA TENDENCIAS
                 const rT = await fetch('tendencia.txt'); const tT = await rT.text();
                 const trendOut = document.getElementById('trend-output');
                 if(tT.trim()) {
                     trendOut.innerHTML = '';
                     tT.trim().split('\n').slice(0,4).forEach(l => {
-                        const [pos, song, art, node, link] = l.split('|').map(s => s.trim());
-                        trendOut.innerHTML += `
-                            <div class="trend-card" onclick="window.location.href='${link}'">
-                                <div class="mini-radar"></div>
-                                <div class="node-tag">NODE: ${node}</div>
-                                <div style="color:var(--neon); font-size:0.6rem;">RANK: ${pos}</div>
-                                <div style="font-weight:bold; color:#fff; font-size:0.9rem; margin:3px 0;">${song}</div>
-                                <div style="color:var(--neon); opacity:0.8; font-size:0.75rem;">${art}</div>
-                            </div>`;
+                        const parts = l.split('|').map(s => s.trim());
+                        if(parts.length >= 5) {
+                            const [pos, song, art, node, link] = parts;
+                            trendOut.innerHTML += `
+                                <div class="trend-card" onclick="window.location.href='${link}'">
+                                    <div class="mini-radar"></div>
+                                    <div class="node-tag">NODE: ${node}</div>
+                                    <div style="color:var(--neon); font-size:0.6rem;">RANK: ${pos}</div>
+                                    <div style="font-weight:bold; color:#fff; font-size:0.9rem; margin:3px 0;">${song}</div>
+                                    <div style="color:var(--neon); opacity:0.8; font-size:0.75rem;">${art}</div>
+                                </div>`;
+                        }
                     });
                 }
+                // CARGA NOTICIAS USA
                 const rN = await fetch('archivo.txt'); const tN = await rN.text();
                 allLines = tN.trim().split('\n').reverse(); render();
             } catch(e) { console.log("Señal débil..."); }
         }
 
+        // --- FUNCIÓN RENDER VINCULADA AL BÚNKER CENTRAL ---
         function render() {
-            const out = document.getElementById('output'); out.innerHTML = '';
+            const out = document.getElementById('output'); 
+            if(!out) return;
+            out.innerHTML = '';
+            
             allLines.slice(0, visibleCount).forEach(l => {
-                const [id, tit, fec, res, link] = l.split('|').map(s => s.trim());
-                out.innerHTML += `
-                <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
-                    <div style="font-size:0.6rem; opacity:0.6;">[${fec}] ID:${id}</div>
-                    <div style="font-weight:bold; color:#fff; margin:4px 0;">${tit}</div>
-                    <div style="opacity:0.7; font-size:0.75rem;">${res.substring(0,90)}...</div>
-                    <a href="${link}" class="btn-news" onclick="event.stopPropagation()">VER REPORTE</a>
-                </div>`;
+                const parts = l.split('|').map(s => s.trim());
+                if(parts.length >= 4) {
+                    const id = parts[0];
+                    const tit = parts[1];
+                    const fec = parts[2];
+                    const res = parts[3];
+
+                    // VINCULACIÓN MAESTRA AL BÚNKER CENTRAL
+                    const linkAlBunker = `https://nvvexstudios.com/archivo.html?id=${id}`;
+
+                    out.innerHTML += `
+                    <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
+                        <div style="font-size:0.6rem; opacity:0.6;">[SYSTEM_USA] ${fec} | ID:${id}</div>
+                        <div style="font-weight:bold; color:#fff; margin:4px 0;">${tit}</div>
+                        <div style="opacity:0.7; font-size:0.75rem;">${res.substring(0,90)}...</div>
+                        <a href="${linkAlBunker}" target="_blank" class="btn-news" onclick="event.stopPropagation()">
+                            VER REPORTE COMPLETO
+                        </a>
+                    </div>`;
+                }
             });
         }
 
@@ -138,9 +160,9 @@
             m.style.display = 'block';
             m.innerHTML = `<div style="background:var(--neon); color:#000; padding:5px; text-align:center; font-weight:bold; font-size:0.8rem;">IDENTIFICADOR: ${id}</div>
                 <p style="font-size:0.7rem; opacity:0.5; margin-top:15px;">CAPTURA: ${fec}</p>
-                <h2 style="color:#fff; border-bottom:1px solid var(--neon); padding-bottom:10px;">${tit}</h2>
-                <p style="color:#aaa; line-height:1.6; font-size:1rem;">${res}</p>
-                <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:12px; cursor:pointer; font-weight:bold; margin-top:15px;">[ CERRAR ARCHIVO ]</button>`;
+                <h2 style="color:#fff; border-bottom:1px solid var(--neon); padding-bottom:10px; font-size:1.2rem;">${tit}</h2>
+                <p style="color:#aaa; line-height:1.6; font-size:0.95rem;">${res}</p>
+                <button onclick="cerrarReporte()" style="width:100%; background:var(--neon); border:none; padding:12px; cursor:pointer; font-weight:bold; margin-top:15px; font-family:inherit;">[ CERRAR ARCHIVO ]</button>`;
         }
 
         function cerrarReporte() {
@@ -150,17 +172,13 @@
 
         function verMas() { visibleCount += 30; render(); }
         load();
-        // --- NVVEX SECURITY & BYPASS PROTOCOL ---
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.onkeydown = e => { 
-    if(e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || (e.shiftKey && e.keyCode == 73)))) return false; 
-};
 
-function nvxBypass(url) {
-    if (!url) return '';
-    return url.replace('http://', 'https://').trim();
-}
-// ----------------------------------------
+        // --- NVVEX SECURITY & BYPASS PROTOCOL ---
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = e => { 
+            if(e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || (e.shiftKey && e.keyCode == 73)))) return false; 
+        };
+        // ----------------------------------------
     </script>
 </body>
 </html>
@@ -170,12 +188,9 @@ function nvxBypass(url) {
     document.onkeydown = e => { 
         if(e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || (e.shiftKey && e.keyCode == 73)))) return false; 
     };
-
     // Auto-limpieza de rastro en Consola
     setInterval(() => { console.clear(); }, 1000);
-
     // Protección de contenido (Anti-arrastre)
     document.addEventListener('dragstart', e => e.preventDefault());
-
     console.log("NVVEX SHIELD: FULLY OPERATIONAL");
 </script>
