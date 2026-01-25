@@ -119,17 +119,19 @@
                     });
                 }
                // 1. CARGA NOTICIAS USA (Fusión: Google + Archivo Local)
+        // 1. MOTOR DE INTELIGENCIA USA (Prioridad: Google Doc)
         const [rG, rA] = await Promise.all([
             fetch('https://docs.google.com/document/d/1MrR7GjQJeLffvJE5jP-SYzufR9R37z7tKNtqa2lwWY0/export?format=txt&t=' + new Date().getTime()).then(r => r.text()).catch(() => ""),
             fetch('archivo.txt').then(r => r.text()).catch(() => "")
         ]);
 
-        const todoElContenido = rG + "\n" + rA;
-        allLines = todoElContenido.trim().split('\n').filter(l => l.includes('|')).reverse(); 
+        // Unimos las noticias dándole prioridad al Google Doc arriba
+        const todoElContenido = rG.trim() + "\n" + rA.trim();
+        allLines = todoElContenido.split('\n').filter(l => l.includes('|')).reverse(); 
         
-        render(); // Dispara el monitor de USA
+        render(); // Lanza la señal al monitor de USA
     } catch(e) { 
-        console.log("Buscando señal en el aire..."); 
+        console.log("Buscando señal..."); 
     }
         }
 
