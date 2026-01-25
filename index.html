@@ -118,10 +118,19 @@
                         }
                     });
                 }
-                // CARGA NOTICIAS USA
-                const rN = await fetch('archivo.txt'); const tN = await rN.text();
-                allLines = tN.trim().split('\n').reverse(); render();
-            } catch(e) { console.log("Señal débil..."); }
+               // 1. CARGA NOTICIAS USA (Fusión: Google + Archivo Local)
+        const [rG, rA] = await Promise.all([
+            fetch('https://docs.google.com/document/d/1MrR7GjQJeLffvJE5jP-SYzufR9R37z7tKNtqa2lwWY0/export?format=txt').then(r => r.text()).catch(() => ""),
+            fetch('archivo.txt').then(r => r.text()).catch(() => "")
+        ]);
+
+        const todoElContenido = rG + "\n" + rA;
+        allLines = todoElContenido.trim().split('\n').filter(l => l.includes('|')).reverse(); 
+        
+        render(); // Dispara el monitor de USA
+    } catch(e) { 
+        console.log("Rastreando señal en el aire..."); 
+    }
         }
 
         // --- FUNCIÓN RENDER VINCULADA AL BÚNKER CENTRAL ---
