@@ -130,11 +130,12 @@
         allLines = todoElContenido.split('\n').filter(l => l.includes('|')).reverse(); 
         
         render(); // Lanza la señal al monitor de USA
-                // SENSOR DE ENLACE: Detecta si el link trae un ID
+                // SENSOR TOTAL: Escanea Doc y Archivo al mismo tiempo
         const urlParams = new URLSearchParams(window.location.search);
         const newsId = urlParams.get('id');
         if (newsId) {
-            const noticia = allLines.find(l => l.includes(`${newsId} |`));
+            // Buscamos en la lista completa donde ya se mezcló el Doc
+            const noticia = allLines.find(l => l.split('|')[0].trim() == newsId);
             if (noticia) {
                 const p = noticia.split('|').map(s => s.trim());
                 abrirReporte(p[0], p[1], p[2], p[3]);
