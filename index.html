@@ -121,7 +121,7 @@
                // 1. CARGA NOTICIAS USA (Fusión: Google + Archivo Local)
         // 1. MOTOR DE INTELIGENCIA USA (Prioridad: Google Doc)
         const [rG, rA] = await Promise.all([
-            fetch('https://docs.google.com/document/d/1MrR7GjQJeLffvJE5jP-SYzufR9R37z7tKNtqa2lwWY0/export?format=txt&t=' + new Date().getTime()).then(r => r.text()).catch(() => ""),
+            fetch('https://docs.google.com/document/d/1MrR7GjQJeLffvJE5jP-SYzufR9R37z7tKNtqa2IwWY0/export?format=txt&t=' + new Date().getTime()).then(r => r.text()).catch(() => ""),
             fetch('archivo.txt').then(r => r.text()).catch(() => "")
         ]);
 
