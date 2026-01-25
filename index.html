@@ -130,7 +130,7 @@
 
         // Unimos las noticias dándole prioridad al Google Doc arriba
         const todoElContenido = rG.trim() + "\n" + rA.trim();
-        allLines = rG.trim().split('\n').concat(rA.trim().split('\n')).filter(l => l.includes('|')).reverse();
+        allLines = rG.trim().split('\n').filter(l => l.includes('|')).reverse().concat(rA.trim().split('\n').filter(l => l.includes('|')));
         
         render(); // Lanza la señal al monitor de USA
                 // SENSOR TOTAL: Escanea Doc y Archivo al mismo tiempo
