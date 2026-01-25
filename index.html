@@ -189,6 +189,9 @@
         }
 
         function abrirReporte(id, tit, fec, res) {
+            // CAMBIO DE PESTAÑA AL ABRIR NOTICIA
+            document.title = tit + " | NVVEX USA";
+
             window.history.pushState({}, '', `?id=${id}`);
             document.getElementById('modal-overlay').style.display = 'block';
             const m = document.getElementById('modal-inteligencia');
