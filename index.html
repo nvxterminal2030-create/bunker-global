@@ -179,6 +179,7 @@
         }
 
         function abrirReporte(id, tit, fec, res) {
+            window.history.pushState({}, '', `?id=${id}`);
             document.getElementById('modal-overlay').style.display = 'block';
             const m = document.getElementById('modal-inteligencia');
             m.style.display = 'block';
