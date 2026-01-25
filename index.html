@@ -103,7 +103,7 @@
                 const trendOut = document.getElementById('trend-output');
                 if(tT.trim()) {
                     trendOut.innerHTML = '';
-                    tT.trim().split('\n').slice(0,4).forEach(l => {
+                    tT.trim().split('\n').slice(0,10).forEach(l => {
                         const parts = l.split('|').map(s => s.trim());
                         if(parts.length >= 5) {
                             const [pos, song, art, node, link] = parts;
