@@ -130,6 +130,16 @@
         allLines = todoElContenido.split('\n').filter(l => l.includes('|')).reverse(); 
         
         render(); // Lanza la señal al monitor de USA
+                // SENSOR DE ENLACE: Detecta si el link trae un ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const newsId = urlParams.get('id');
+        if (newsId) {
+            const noticia = allLines.find(l => l.includes(`${newsId} |`));
+            if (noticia) {
+                const p = noticia.split('|').map(s => s.trim());
+                abrirReporte(p[0], p[1], p[2], p[3]);
+            }
+        }
     } catch(e) { 
         console.log("Buscando señal..."); 
     }
@@ -151,16 +161,18 @@
 
                     // VINCULACIÓN MAESTRA AL BÚNKER CENTRAL
                     const linkAlBunker = `https://nvvexstudios.com/archivo.html?id=${id}`;
-
                     out.innerHTML += `
-                    <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
-                        <div style="font-size:0.6rem; opacity:0.6;">[SYSTEM_USA] ${fec} | ID:${id}</div>
-                        <div style="font-weight:bold; color:#fff; margin:4px 0;">${tit}</div>
-                        <div style="opacity:0.7; font-size:0.75rem;">${res.substring(0,90)}...</div>
-                        <a href="${linkAlBunker}" target="_blank" class="btn-news" onclick="event.stopPropagation()">
-                            VER REPORTE COMPLETO
-                        </a>
-                    </div>`;
+                        <div class="news-item" onclick="abrirReporte('${id}','${tit}','${fec}','${res}')">
+                            <div style="font-size:0.6rem; opacity:0.6;">[SYSTEM_USA] ${fec} | ID:${id}</div>
+                            <div style="font-weight:bold; color:#fff; margin:4px 0;">${tit}</div>
+                            <div style="opacity:0.7; font-size:0.75rem;">${res.substring(0,90)}...</div>
+                            <a href="${linkAlBunker}" target="_blank" class="btn-news" style="display:block; margin-bottom:5px; text-decoration:none; text-align:center;">VER REPORTE COMPLETO</a>
+                            <button onclick="event.stopPropagation(); prompt('Link para Google/Redes:', window.location.origin + window.location.pathname + '?id=${id}')" 
+                                    style="background:transparent; color:var(--neon); border:1px solid var(--neon); padding:5px; font-size:0.7rem; cursor:pointer; font-family:inherit; width:100%;">
+                                [ GENERAR LINK DE INTELIGENCIA ]
+                            </button>
+                        </div>
+                    `;
                 }
             });
         }
