@@ -154,7 +154,14 @@
             const out = document.getElementById('output'); 
             if(!out) return;
             out.innerHTML = '';
-            
+
+            // ACTUALIZACIÓN DE TÍTULO PARA EL NAVEGADOR (SEO)
+            if (allLines.length > 0) {
+                const primerNodo = allLines[0].split('|');
+                if (primerNodo.length >= 2) {
+                    document.title = primerNodo[1].trim() + " | NVVEX USA";
+                }
+            }
             allLines.slice(0, visibleCount).forEach(l => {
                 const parts = l.split('|').map(s => s.trim());
                 if(parts.length >= 4) {
