@@ -191,7 +191,14 @@
         function abrirReporte(id, tit, fec, res) {
             // CAMBIO DE PESTAÑA AL ABRIR NOTICIA
             document.title = tit + " | NVVEX USA";
-
+// INYECCIÓN DE INTELIGENCIA PARA GOOGLE (SEO)
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.name = "description";
+        document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute("content", res.substring(0, 160));
             window.history.pushState({}, '', `?id=${id}`);
             document.getElementById('modal-overlay').style.display = 'block';
             const m = document.getElementById('modal-inteligencia');
